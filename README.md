@@ -78,8 +78,8 @@ We welcome contributions! 🚀
 
 ## 🌎 Connect with Me
 🔗 **GitHub:** [Shambhavigaur31](https://github.com/Shambhavigaur31)  
-📧 **Email:** your.email@example.com  
-🔗 **LinkedIn:** [Your Profile](https://linkedin.com/in/yourprofile)
+📧 **Email:** gaurshambhavi31@gmail.com  
+🔗 **LinkedIn:** [Your Profile](https://www.linkedin.com/in/shambhavi-gaur-a9a15028b/)
 
 ---
 
