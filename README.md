@@ -65,7 +65,7 @@ Ensure you have the following installed:
 5. **Get AI-powered recommendations** for improving skills.
 
 ## 📸 Screenshots
-*(Add images or GIFs of your dashboard for better visualization.)*
+
 
 ## 🤝 Contributing
 We welcome contributions! 🚀
