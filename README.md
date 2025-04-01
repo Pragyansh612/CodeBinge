@@ -4,7 +4,7 @@
 _A one-stop interactive dashboard for managing and tracking your coding journey!_
 
 ## 🔥 Overview
-CodeBinge is an advanced, interactive **dashboard** that consolidates coding profiles from various platforms like **LeetCode, Codeforces, CodeChef, and more**. With real-time updates, analytics, and a sleek UI, CodeBinge enhances your coding experience by providing **insights, trends, and personalized recommendations**.
+CodeBinge is an advanced, interactive **dashboard** that consolidates coding profiles from various platforms like **LeetCode, Codeforces, CodeChef, Geeks for Geeks and more**. With real-time updates, analytics, and a sleek UI, CodeBinge enhances your coding experience by providing **insights, trends, and personalized recommendations**.
 
 ## ⚡ Features
 - 📊 **Consolidated Coding Profile** – Track multiple coding platforms in one place.
@@ -16,11 +16,11 @@ CodeBinge is an advanced, interactive **dashboard** that consolidates coding pro
 - 🎨 **Dark Mode & Neon Theme** – Enjoy a futuristic UI with smooth animations.
 
 ## 🚀 Tech Stack
-- **Frontend:** Next.js, React, Tailwind CSS, ShadCN
+- **Frontend:** Next.js, React, Tailwind CSS
 - **Backend:** Node.js, Express.js
 - **Database:** Firebase / MongoDB
-- **APIs:** LeetCode, Codeforces, CodeChef (via web scraping or official APIs)
-- **Deployment:** Vercel, Netlify, or AWS
+- **APIs:** LeetCode, Codeforces, CodeChef, Geeks for Geeks(via web scraping or official APIs)
+- **Deployment:** Vercel
 
 ## 💻 Getting Started
 
@@ -63,8 +63,6 @@ Ensure you have the following installed:
 3. **Participate in challenges and discussions**.
 4. **Compete on leaderboards** and improve your ranking.
 5. **Get AI-powered recommendations** for improving skills.
-
-## 📸 Screenshots
 
 
 ## 🤝 Contributing
