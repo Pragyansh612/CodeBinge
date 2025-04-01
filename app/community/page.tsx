@@ -5,7 +5,7 @@ import { TrendingArticles } from "@/components/community/trending-articles"
 import { CommunityMembers } from "@/components/community/community-members"
 
 export const metadata: Metadata = {
-  title: "Community | Codefolio",
+  title: "Community | CodeBinge",
   description: "Connect with other coders and share knowledge",
 }
 

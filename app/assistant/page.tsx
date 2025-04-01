@@ -3,7 +3,7 @@ import { CodingAssistant } from "@/components/assistant/coding-assistant"
 import { AssistantSidebar } from "@/components/assistant/assistant-sidebar"
 
 export const metadata: Metadata = {
-  title: "Coding Assistant | Codefolio",
+  title: "Coding Assistant | CodeBinge",
   description: "Get personalized coding help and recommendations",
 }
 

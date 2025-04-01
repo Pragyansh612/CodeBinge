@@ -1,3 +1,5 @@
+'use client'; // Add this if using Next.js App Router
+import { useEffect, useState } from 'react';
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -23,14 +25,18 @@ const badgeVariants = cva(
   }
 )
 
-export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
-
 function Badge({ className, variant, ...props }: BadgeProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return null;
+
   return (
     <div className={cn(badgeVariants({ variant }), className)} {...props} />
-  )
+  );
 }
 
 export { Badge, badgeVariants }

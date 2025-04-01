@@ -4,7 +4,7 @@ import { WeeklyComparison } from "@/components/compare/weekly-comparison"
 import { PlatformComparison } from "@/components/compare/platform-comparison"
 
 export const metadata: Metadata = {
-  title: "Compare | Codefolio",
+  title: "Compare | CodeBinge",
   description: "Compare your coding profile with friends",
 }
 

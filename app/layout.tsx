@@ -12,9 +12,8 @@ import { DashboardDataProvider } from "@/contexts/dashboard-data-context"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Codefolio - Coding Profile Dashboard",
-  description: "Track your coding journey across multiple platforms",
-    generator: 'v0.dev'
+  title: "CodeBinge - Coding Profile Dashboard",
+  description: "Track your coding journey across multiple platforms"
 }
 
 // Wrap the entire app with the DashboardDataProvider

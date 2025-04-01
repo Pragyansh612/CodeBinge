@@ -6,7 +6,7 @@ import { SkillRadar } from "@/components/analytics/skill-radar"
 import { ProblemDistribution } from "@/components/analytics/problem-distribution"
 
 export const metadata: Metadata = {
-  title: "Analytics | Codefolio",
+  title: "Analytics | CodeBinge",
   description: "Analyze your coding performance and compare with friends",
 }
 

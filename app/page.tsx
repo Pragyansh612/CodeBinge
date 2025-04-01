@@ -10,7 +10,7 @@ import { RecommendedProblems } from "@/components/dashboard/recommended-problems
 import { Achievements } from "@/components/dashboard/achievements"
 
 export const metadata: Metadata = {
-  title: "Dashboard | Codefolio",
+  title: "Dashboard | CodeBinge",
   description: "Your coding profile dashboard",
 }
 

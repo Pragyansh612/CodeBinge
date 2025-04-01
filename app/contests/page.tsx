@@ -3,7 +3,7 @@ import { ContestCalendar } from "@/components/contests/contest-calendar"
 import { UpcomingContests } from "@/components/contests/upcoming-contests"
 
 export const metadata: Metadata = {
-  title: "Contests | Codefolio",
+  title: "Contests | CodeBinge",
   description: "Track upcoming coding contests",
 }
 
