@@ -83,7 +83,11 @@ export function ProfileSetup() {
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    router.push('/')
+    
+    // Check if at least one profile is valid before redirecting
+    if (status.leetcode.valid || status.codeforces.valid) {
+      router.push('/')
+    }
   }
   
   return (
@@ -91,7 +95,7 @@ export function ProfileSetup() {
       <CardHeader>
         <CardTitle>Connect Your Coding Profiles</CardTitle>
         <CardDescription>
-          Enter your usernames to synchronize your stats from different coding platforms
+          Enter your username for at least one platform to continue
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -126,6 +130,15 @@ export function ProfileSetup() {
                   {status.leetcode.error}
                 </div>
               )}
+            </div>
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-secondary"></span>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">or</span>
+              </div>
             </div>
             
             <div>

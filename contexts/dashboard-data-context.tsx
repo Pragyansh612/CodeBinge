@@ -64,7 +64,7 @@ export function DashboardDataProvider({ children }: { children: React.ReactNode 
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    const loadSavedData = () => {
+    const loadSavedData = async () => {
       try {
         const leetcodeUsername = localStorage.getItem('leetcodeUsername')
         const codeforcesUsername = localStorage.getItem('codeforcesUsername')
@@ -74,7 +74,7 @@ export function DashboardDataProvider({ children }: { children: React.ReactNode 
             ...prev,
             leetcode: { ...prev.leetcode, username: leetcodeUsername }
           }))
-          fetchLeetCodeData(leetcodeUsername)
+          await fetchLeetCodeData(leetcodeUsername)
         }
         
         if (codeforcesUsername) {
@@ -82,7 +82,7 @@ export function DashboardDataProvider({ children }: { children: React.ReactNode 
             ...prev,
             codeforces: { ...prev.codeforces, username: codeforcesUsername }
           }))
-          fetchCodeforcesData(codeforcesUsername)
+          await fetchCodeforcesData(codeforcesUsername)
         }
       } catch (error) {
         console.error("Error loading saved data:", error)
@@ -125,26 +125,25 @@ export function DashboardDataProvider({ children }: { children: React.ReactNode 
       }
       
       const userData = await response.json()
+      
       if (userData.data?.matchedUser) {
         const user = userData.data.matchedUser
         const submitStats = user.submitStats.acSubmissionNum || []
-
-        console.log(submitStats)
-        console.log(user)
-
-        const todaySolved = 0
         
         let easySolved = 0
         let mediumSolved = 0
         let hardSolved = 0
         let totalSolved = 0
         
-        submitStats.forEach((stat:any) => {
+        // Correctly parse submission stats
+        submitStats.forEach((stat: any) => {
           if (stat.difficulty === "Easy") easySolved = stat.count
           if (stat.difficulty === "Medium") mediumSolved = stat.count
           if (stat.difficulty === "Hard") hardSolved = stat.count
-          totalSolved += stat.count || 0
         })
+        
+        // Calculate total by adding individual difficulties
+        totalSolved = easySolved + mediumSolved + hardSolved
         
         setData(prev => ({
           ...prev,
@@ -156,7 +155,7 @@ export function DashboardDataProvider({ children }: { children: React.ReactNode 
             mediumSolved,
             hardSolved,
             ranking: user.profile?.ranking || null,
-            todaySolved,
+            todaySolved: 0, // This would need a separate API call to get today's submissions
             loading: false,
             error: null
           }
@@ -173,6 +172,7 @@ export function DashboardDataProvider({ children }: { children: React.ReactNode 
           error: error instanceof Error ? error.message : 'Unknown error occurred'
         }
       }))
+      throw error
     } finally {
       setIsLoading(false)
     }
@@ -196,7 +196,6 @@ export function DashboardDataProvider({ children }: { children: React.ReactNode 
       
       if (userData.userInfo) {
         const userInfo = userData.userInfo
-        const todaySolved = 0
         
         setData(prev => ({
           ...prev,
@@ -206,7 +205,7 @@ export function DashboardDataProvider({ children }: { children: React.ReactNode 
             totalSolved: userData.solvedCount || 0,
             rating: userInfo.rating || null,
             rank: userInfo.rank || null,
-            todaySolved,
+            todaySolved: 0, // Would need to calculate from submissions
             loading: false,
             error: null
           }
@@ -223,6 +222,7 @@ export function DashboardDataProvider({ children }: { children: React.ReactNode 
           error: error instanceof Error ? error.message : 'Unknown error occurred'
         }
       }))
+      throw error
     } finally {
       setIsLoading(false)
     }

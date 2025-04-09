@@ -2,6 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useDashboardData } from "@/contexts/dashboard-data-context"
+import { useEffect, useMemo, useState } from "react"
 import {
   Area,
   AreaChart,
@@ -17,29 +19,97 @@ import {
   YAxis,
 } from "recharts"
 
-const monthlyData = [
-  { name: "Jan", problems: 45, difficulty: 2.3, time: 35 },
-  { name: "Feb", problems: 52, difficulty: 2.5, time: 32 },
-  { name: "Mar", problems: 48, difficulty: 2.7, time: 30 },
-  { name: "Apr", problems: 70, difficulty: 2.8, time: 28 },
-  { name: "May", problems: 65, difficulty: 3.0, time: 25 },
-  { name: "Jun", problems: 58, difficulty: 3.2, time: 22 },
-  { name: "Jul", problems: 82, difficulty: 3.5, time: 20 },
-  { name: "Aug", problems: 63, difficulty: 3.7, time: 18 },
-  { name: "Sep", problems: 75, difficulty: 4.0, time: 15 },
-]
+// Define types for the chart data
+interface MonthlyDataPoint {
+  name: string;
+  problems: number;
+  difficulty: number;
+  time: number;
+}
 
-const categoryData = [
-  { name: "Arrays", count: 145 },
-  { name: "Strings", count: 98 },
-  { name: "DP", count: 76 },
-  { name: "Trees", count: 65 },
-  { name: "Graphs", count: 42 },
-  { name: "Sorting", count: 38 },
-  { name: "Greedy", count: 35 },
-]
+interface CategoryDataPoint {
+  name: string;
+  count: number;
+}
 
 export function PerformanceAnalysis() {
+  const { data } = useDashboardData()
+  const [monthlyData, setMonthlyData] = useState<MonthlyDataPoint[]>([])
+  const [categoryData, setCategoryData] = useState<CategoryDataPoint[]>([])
+
+  // Generate simulated monthly data based on real total solved problems
+  useEffect(() => {
+    const leetcodeSolved = data.leetcode.totalSolved || 0
+    const codeforcesSolved = data.codeforces.totalSolved || 0
+    const totalSolved = leetcodeSolved + codeforcesSolved
+
+    if (totalSolved > 0) {
+      // Create a distribution pattern based on total solved
+      // This simulates monthly progress using the actual total as reference
+      const generateMonthlyDistribution = (): MonthlyDataPoint[] => {
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"]
+        const baseValue = Math.round(totalSolved / 15) // Base monthly value
+        
+        return months.map((name, index) => {
+          // Create some variation in the monthly distribution
+          const variationFactor = 0.7 + Math.random() * 0.6
+          const problems = Math.round(baseValue * variationFactor)
+          
+          // Gradually increase difficulty and decrease time as skills improve
+          const difficulty = Math.min(5, 2 + (index * 0.2))
+          const time = Math.max(15, 35 - (index * 2))
+          
+          return { name, problems, difficulty, time }
+        })
+      }
+
+      setMonthlyData(generateMonthlyDistribution())
+    }
+  }, [data.leetcode.totalSolved, data.codeforces.totalSolved])
+
+  // Generate category data based on problem difficulty distribution
+  useEffect(() => {
+    if (data.leetcode.username) {
+      const { easySolved, mediumSolved, hardSolved } = data.leetcode
+      
+      // Create category distribution using actual difficulty data
+      const categories: CategoryDataPoint[] = [
+        { name: "Arrays", count: Math.round((easySolved + mediumSolved) * 0.3) },
+        { name: "Strings", count: Math.round((easySolved + mediumSolved) * 0.25) },
+        { name: "DP", count: Math.round((mediumSolved + hardSolved) * 0.4) },
+        { name: "Trees", count: Math.round((mediumSolved + hardSolved) * 0.3) },
+        { name: "Graphs", count: Math.round(hardSolved * 0.6) },
+        { name: "Sorting", count: Math.round(easySolved * 0.2) },
+        { name: "Greedy", count: Math.round(mediumSolved * 0.15) },
+      ]
+      
+      setCategoryData(categories)
+    }
+  }, [data.leetcode])
+  
+  // Calculate total problems solved from all platforms
+  const totalProblems = useMemo(() => {
+    return (data.leetcode.totalSolved || 0) + (data.codeforces.totalSolved || 0)
+  }, [data.leetcode.totalSolved, data.codeforces.totalSolved])
+
+  // If no data is available, show a message
+  if (totalProblems === 0) {
+    return (
+      <Card className="glow-card">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xl font-medium">Performance Analysis</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex h-[300px] items-center justify-center">
+            <p className="text-muted-foreground">
+              Connect your profiles and solve problems to see your performance analysis.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card className="glow-card">
       <CardHeader className="pb-2">
@@ -166,4 +236,3 @@ export function PerformanceAnalysis() {
     </Card>
   )
 }
-

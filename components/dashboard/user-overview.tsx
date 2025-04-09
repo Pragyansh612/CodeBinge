@@ -2,14 +2,14 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Sparkles } from "lucide-react"
+import { Sparkles, Settings } from "lucide-react"
 import { useDashboardData } from "@/contexts/dashboard-data-context"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Settings } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function UserOverview() {
-  const { data } = useDashboardData()
+  const { data, isLoading } = useDashboardData()
   
   const totalSolved = data.leetcode.totalSolved + data.codeforces.totalSolved
   const todaySolved = data.leetcode.todaySolved + data.codeforces.todaySolved
@@ -43,6 +43,30 @@ export function UserOverview() {
     )
   }
   
+  if (isLoading) {
+    return (
+      <Card className="glow-card overflow-hidden">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-medium">Solved Problems</CardTitle>
+            <Skeleton className="h-6 w-32" />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-16 w-16" />
+            <Skeleton className="h-10 w-10 rounded-full" />
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Skeleton className="h-6 w-20" />
+            <Skeleton className="h-6 w-24" />
+            <Skeleton className="h-6 w-16" />
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+  
   return (
     <Card className="glow-card overflow-hidden">
       <CardHeader className="pb-2">
@@ -60,17 +84,34 @@ export function UserOverview() {
             <Sparkles className="h-6 w-6 text-yellow-400" />
           </div>
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Badge variant="secondary" className="bg-secondary/50">
-            Easy: {easySolved}
-          </Badge>
-          <Badge variant="secondary" className="bg-secondary/50">
-            Medium: {mediumSolved}
-          </Badge>
-          <Badge variant="secondary" className="bg-secondary/50">
-            Hard: {hardSolved}
-          </Badge>
-        </div>
+        
+        {data.leetcode.username && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Badge variant="secondary" className="bg-secondary/50">
+              Easy: {easySolved}
+            </Badge>
+            <Badge variant="secondary" className="bg-secondary/50">
+              Medium: {mediumSolved}
+            </Badge>
+            <Badge variant="secondary" className="bg-secondary/50">
+              Hard: {hardSolved}
+            </Badge>
+          </div>
+        )}
+        
+        {data.codeforces.username && data.codeforces.rating && (
+          <div className="mt-2">
+            <Badge variant="secondary" className="bg-secondary/50">
+              Rating: {data.codeforces.rating}
+            </Badge>
+            {data.codeforces.rank && (
+              <Badge variant="secondary" className="bg-secondary/50 ml-2">
+                Rank: {data.codeforces.rank}
+              </Badge>
+            )}
+          </div>
+        )}
+        
         <div className="mt-4 flex justify-end">
           <Link href="/profile">
             <Button variant="ghost" size="sm">
