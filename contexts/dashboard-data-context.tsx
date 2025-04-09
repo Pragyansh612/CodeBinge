@@ -1,146 +1,249 @@
 "use client"
 
-import { createContext, useContext, type ReactNode } from "react"
+import React, { createContext, useContext, useState, useEffect } from "react"
 
-// Define types for our dashboard data
-export interface DashboardData {
-  // User stats
-  totalSolved: number
-  easyProblems: number
-  mediumProblems: number
-  hardProblems: number
-  dailyStreak: number
-  weeklyTarget: {
-    achieved: number
-    target: number
-    progress: number[]
+interface DashboardData {
+  leetcode: {
+    username: string | null
+    totalSolved: number
+    easySolved: number
+    mediumSolved: number
+    hardSolved: number
+    ranking: number | null
+    todaySolved: number
+    loading: boolean
+    error: string | null
+  }
+  codeforces: {
+    username: string | null
+    totalSolved: number
+    rating: number | null
+    rank: string | null
+    todaySolved: number
+    loading: boolean
+    error: string | null
+  }
+}
+
+interface DashboardDataContextProps {
+  data: DashboardData
+  updateLeetCodeUsername: (username: string) => void
+  updateCodeforcesUsername: (username: string) => void
+  fetchLeetCodeData: (username: string) => Promise<void>
+  fetchCodeforcesData: (username: string) => Promise<void>
+  isLoading: boolean
+}
+
+const initialData: DashboardData = {
+  leetcode: {
+    username: null,
+    totalSolved: 0,
+    easySolved: 0,
+    mediumSolved: 0,
+    hardSolved: 0,
+    ranking: null,
+    todaySolved: 0,
+    loading: false,
+    error: null
+  },
+  codeforces: {
+    username: null,
+    totalSolved: 0,
+    rating: null,
+    rank: null,
+    todaySolved: 0,
+    loading: false,
+    error: null
+  }
+}
+
+const DashboardDataContext = createContext<DashboardDataContextProps | undefined>(undefined)
+
+export function DashboardDataProvider({ children }: { children: React.ReactNode }) {
+  const [data, setData] = useState<DashboardData>(initialData)
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    const loadSavedData = () => {
+      try {
+        const leetcodeUsername = localStorage.getItem('leetcodeUsername')
+        const codeforcesUsername = localStorage.getItem('codeforcesUsername')
+        
+        if (leetcodeUsername) {
+          setData(prev => ({
+            ...prev,
+            leetcode: { ...prev.leetcode, username: leetcodeUsername }
+          }))
+          fetchLeetCodeData(leetcodeUsername)
+        }
+        
+        if (codeforcesUsername) {
+          setData(prev => ({
+            ...prev,
+            codeforces: { ...prev.codeforces, username: codeforcesUsername }
+          }))
+          fetchCodeforcesData(codeforcesUsername)
+        }
+      } catch (error) {
+        console.error("Error loading saved data:", error)
+      }
+    }
+    
+    loadSavedData()
+  }, [])
+
+  const updateLeetCodeUsername = (username: string) => {
+    localStorage.setItem('leetcodeUsername', username)
+
+    setData(prev => ({
+      ...prev,
+      leetcode: { ...prev.leetcode, username }
+    }))
   }
 
-  // Platform stats
-  platforms: {
-    name: string
-    username: string
-    solved: number
-    icon: string
-  }[]
+  const updateCodeforcesUsername = (username: string) => {
+    localStorage.setItem('codeforcesUsername', username)
+    
+    setData(prev => ({
+      ...prev,
+      codeforces: { ...prev.codeforces, username }
+    }))
+  }
 
-  // Performance data
-  monthlyData: {
-    name: string
-    problems: number
-    difficulty: number
-    time: number
-  }[]
+  const fetchLeetCodeData = async (username: string) => {
+    setData(prev => ({
+      ...prev,
+      leetcode: { ...prev.leetcode, loading: true, error: null }
+    }))
+    setIsLoading(true)
 
-  // Topic distribution
-  topicData: {
-    name: string
-    count: number
-  }[]
+    try {
+      const response = await fetch(`/api/leetcode?username=${username}`)
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch LeetCode data')
+      }
+      
+      const userData = await response.json()
+      if (userData.data?.matchedUser) {
+        const user = userData.data.matchedUser
+        const submitStats = user.submitStats.acSubmissionNum || []
 
-  // Recommendations
-  recommendedProblems: {
-    id: number
-    title: string
-    platform: string
-    difficulty: string
-    tags: string[]
-    company: string
-  }[]
+        console.log(submitStats)
+        console.log(user)
+
+        const todaySolved = 0
+        
+        let easySolved = 0
+        let mediumSolved = 0
+        let hardSolved = 0
+        let totalSolved = 0
+        
+        submitStats.forEach((stat:any) => {
+          if (stat.difficulty === "Easy") easySolved = stat.count
+          if (stat.difficulty === "Medium") mediumSolved = stat.count
+          if (stat.difficulty === "Hard") hardSolved = stat.count
+          totalSolved += stat.count || 0
+        })
+        
+        setData(prev => ({
+          ...prev,
+          leetcode: {
+            ...prev.leetcode,
+            username,
+            totalSolved,
+            easySolved,
+            mediumSolved,
+            hardSolved,
+            ranking: user.profile?.ranking || null,
+            todaySolved,
+            loading: false,
+            error: null
+          }
+        }))
+      } else {
+        throw new Error('User data not found')
+      }
+    } catch (error) {
+      setData(prev => ({
+        ...prev,
+        leetcode: {
+          ...prev.leetcode,
+          loading: false,
+          error: error instanceof Error ? error.message : 'Unknown error occurred'
+        }
+      }))
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const fetchCodeforcesData = async (username: string) => {
+    setData(prev => ({
+      ...prev,
+      codeforces: { ...prev.codeforces, loading: true, error: null }
+    }))
+    setIsLoading(true)
+
+    try {
+      const response = await fetch(`/api/codeforces?username=${username}`)
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch Codeforces data')
+      }
+      
+      const userData = await response.json()
+      
+      if (userData.userInfo) {
+        const userInfo = userData.userInfo
+        const todaySolved = 0
+        
+        setData(prev => ({
+          ...prev,
+          codeforces: {
+            ...prev.codeforces,
+            username,
+            totalSolved: userData.solvedCount || 0,
+            rating: userInfo.rating || null,
+            rank: userInfo.rank || null,
+            todaySolved,
+            loading: false,
+            error: null
+          }
+        }))
+      } else {
+        throw new Error('User data not found')
+      }
+    } catch (error) {
+      setData(prev => ({
+        ...prev,
+        codeforces: {
+          ...prev.codeforces,
+          loading: false,
+          error: error instanceof Error ? error.message : 'Unknown error occurred'
+        }
+      }))
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <DashboardDataContext.Provider 
+      value={{ 
+        data, 
+        updateLeetCodeUsername, 
+        updateCodeforcesUsername,
+        fetchLeetCodeData,
+        fetchCodeforcesData,
+        isLoading
+      }}
+    >
+      {children}
+    </DashboardDataContext.Provider>
+  )
 }
 
-// Mock data that matches what's displayed in the dashboard
-const dashboardMockData: DashboardData = {
-  totalSolved: 2386,
-  easyProblems: 1245,
-  mediumProblems: 876,
-  hardProblems: 265,
-  dailyStreak: 15,
-  weeklyTarget: {
-    achieved: 5,
-    target: 7,
-    progress: [2, 3, 4, 3, 2, 0, 0],
-  },
-  platforms: [
-    { name: "CodeChef", username: "codechef", solved: 62, icon: "🍴" },
-    { name: "Codeforces", username: "codeforces", solved: 286, icon: "📊" },
-    { name: "LeetCode", username: "leetcode", solved: 670, icon: "⚡" },
-    { name: "GeeksforGeeks", username: "gfg", solved: 124, icon: "👨‍💻" },
-  ],
-  monthlyData: [
-    { name: "Jan", problems: 45, difficulty: 2.3, time: 35 },
-    { name: "Feb", problems: 52, difficulty: 2.5, time: 32 },
-    { name: "Mar", problems: 48, difficulty: 2.7, time: 30 },
-    { name: "Apr", problems: 70, difficulty: 2.8, time: 28 },
-    { name: "May", problems: 65, difficulty: 3.0, time: 25 },
-    { name: "Jun", problems: 58, difficulty: 3.2, time: 22 },
-    { name: "Jul", problems: 82, difficulty: 3.5, time: 20 },
-    { name: "Aug", problems: 63, difficulty: 3.7, time: 18 },
-    { name: "Sep", problems: 75, difficulty: 4.0, time: 15 },
-  ],
-  topicData: [
-    { name: "Arrays", count: 145 },
-    { name: "Strings", count: 98 },
-    { name: "DP", count: 76 },
-    { name: "Trees", count: 65 },
-    { name: "Graphs", count: 42 },
-    { name: "Sorting", count: 38 },
-    { name: "Greedy", count: 35 },
-  ],
-  recommendedProblems: [
-    {
-      id: 1,
-      title: "Two Sum",
-      platform: "LeetCode",
-      difficulty: "Easy",
-      tags: ["Arrays", "Hash Table"],
-      company: "Amazon",
-    },
-    {
-      id: 2,
-      title: "Valid Parentheses",
-      platform: "LeetCode",
-      difficulty: "Easy",
-      tags: ["Stack", "String"],
-      company: "Google",
-    },
-    {
-      id: 3,
-      title: "Merge Intervals",
-      platform: "LeetCode",
-      difficulty: "Medium",
-      tags: ["Arrays", "Sorting"],
-      company: "Facebook",
-    },
-    {
-      id: 4,
-      title: "Number of Islands",
-      platform: "LeetCode",
-      difficulty: "Medium",
-      tags: ["DFS", "BFS", "Graph"],
-      company: "Amazon",
-    },
-    {
-      id: 5,
-      title: "Trapping Rain Water",
-      platform: "LeetCode",
-      difficulty: "Hard",
-      tags: ["Arrays", "Two Pointers", "Dynamic Programming"],
-      company: "Google",
-    },
-  ],
-}
-
-// Create context
-const DashboardDataContext = createContext<DashboardData | undefined>(undefined)
-
-// Provider component
-export function DashboardDataProvider({ children }: { children: ReactNode }) {
-  // In a real app, you would fetch this data from an API
-  return <DashboardDataContext.Provider value={dashboardMockData}>{children}</DashboardDataContext.Provider>
-}
-
-// Hook to use the dashboard data
 export function useDashboardData() {
   const context = useContext(DashboardDataContext)
   if (context === undefined) {
@@ -148,4 +251,3 @@ export function useDashboardData() {
   }
   return context
 }
-
