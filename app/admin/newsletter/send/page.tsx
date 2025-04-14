@@ -1,84 +1,101 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { supabase } from '@/lib/supabase';
-import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
-import { sendBulkEmails } from '@/lib/emailService';
+// app/admin/newsletter/send/page.tsx
+'use client';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function SendNewsletterPage() {
+  const [subject, setSubject] = useState('');
+  const [content, setContent] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [message, setMessage] = useState('');
+  const router = useRouter();
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setStatus('loading');
+
+    try {
+      const response = await fetch('/api/newsletter/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ subject, content }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Something went wrong');
+      }
+
+      setMessage(`Newsletter sent to ${data.sentCount} subscribers`);
+      setStatus('success');
+      
+      // Reset form after success
+      setSubject('');
+      setContent('');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to send newsletter');
+      setStatus('error');
+    }
   }
 
-  // Create authenticated Supabase client
-  const supabaseServerClient = createServerSupabaseClient({ req, res });
-    
-  // Check if user is authenticated
-  const {
-    data: { user },
-  } = await supabaseServerClient.auth.getUser();
-
-  // Check if user is admin
-  const ADMIN_EMAILS = ['saxenaprgyansh@gmail.com'];
-  if (!user || !user.email || !ADMIN_EMAILS.includes(user.email)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  try {
-    const { subject, content } = req.body;
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">Send Newsletter</h1>
       
-    if (!subject || !content) {
-      return res.status(400).json({ error: 'Subject and content are required' });
-    }
-      
-    // Get all active subscribers
-    const { data: subscribers, error } = await supabase
-      .from('newsletter_subscribers')
-      .select('email')
-      .eq('is_active', true);
-      
-    if (error) {
-      throw new Error(error.message);
-    }
-      
-    if (!subscribers || subscribers.length === 0) {
-      return res.status(404).json({ error: 'No active subscribers found' });
-    }
-      
-    // Extract just the email addresses
-    const recipientEmails = subscribers.map(sub => sub.email);
-      
-    // Create HTML content from the plain text
-    const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #333;">${subject}</h2>
-        <div style="line-height: 1.6;">
-          ${content.replace(/\n/g, '<br>')}
+      {status === 'success' && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          {message}
         </div>
-        <div style="margin-top: 20px; font-size: 12px; color: #666;">
-          <p>To unsubscribe from this newsletter, please <a href="${process.env.SITE_URL}/unsubscribe" style="color: #0066cc;">click here</a>.</p>
+      )}
+      
+      {status === 'error' && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          Error: {message}
         </div>
-      </div>
-    `;
+      )}
       
-    // Send the newsletter
-    const sentCount = await sendBulkEmails(
-      recipientEmails,
-      subject,
-      htmlContent,
-      content // Add this if your sendBulkEmails function expects a plain text version
-    );
-      
-    return res.status(200).json({
-      success: true,
-      sentCount
-    });
-      
-  } catch (error) {
-    console.error('Error sending newsletter:', error);
-    return res.status(500).json({
-      error: error instanceof Error ? error.message : 'Failed to send newsletter'
-    });
-  }
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="subject" className="block mb-2 font-medium">
+            Subject
+          </label>
+          <input
+            type="text"
+            id="subject"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+        
+        <div>
+          <label htmlFor="content" className="block mb-2 font-medium">
+            Content
+          </label>
+          <textarea
+            id="content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="w-full p-2 border rounded h-64"
+            required
+          />
+        </div>
+        
+        <div>
+          <button
+            type="submit"
+            disabled={status === 'loading'}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
+          >
+            {status === 'loading' ? 'Sending...' : 'Send Newsletter'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
 }
