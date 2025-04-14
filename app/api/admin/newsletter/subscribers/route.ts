@@ -19,16 +19,8 @@ export async function GET() {
       }
     );
 
-    // Check if user is authenticated
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Check if user is admin
-    // const ADMIN_EMAILS = ['saxenaprgyansh@gmail.com'];
-    // if (!user || !user.email || !ADMIN_EMAILS.includes(user.email)) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
-
-    // Get the count of active subscribers - use the same supabase client
     const { count, error } = await supabase
       .from('newsletter_subscribers')
       .select('*', { count: 'exact', head: true })

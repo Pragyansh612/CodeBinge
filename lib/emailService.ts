@@ -45,14 +45,12 @@ export async function sendBulkEmails(
 ): Promise<number> {
   let successCount = 0;
 
-  // For better performance, you might want to use a service like SendGrid or Mailchimp
-  // which are designed for bulk sending. This is a simple implementation.
   for (const recipient of recipients) {
     try {
       const result = await sendEmail({
         to: recipient,
         subject,
-        text: textContent || htmlContent.replace(/<[^>]*>/g, ''), // Strip HTML if no text provided
+        text: textContent || htmlContent.replace(/<[^>]*>/g, ''),
         html: htmlContent,
       });
       

@@ -15,12 +15,11 @@ export async function POST(request: NextRequest) {
     }
     
     if (action === 'subscribe') {
-      // Add to newsletter_subscribers table
       const { error } = await supabase
         .from('newsletter_subscribers')
         .insert([{ email, is_active: true }])
       
-      if (error && error.code !== '23505') { // Ignore duplicate key errors
+      if (error && error.code !== '23505') { 
         throw error
       }
       
@@ -30,7 +29,6 @@ export async function POST(request: NextRequest) {
       })
     } 
     else if (action === 'unsubscribe') {
-      // Update is_active to false
       const { error } = await supabase
         .from('newsletter_subscribers')
         .update({ is_active: false })
